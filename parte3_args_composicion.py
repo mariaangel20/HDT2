@@ -24,18 +24,32 @@
 #    (Ver formato en salida esperada)
 
 def ingreso_total(*montos):
-    # TODO: SIN sum()
-    pass
+    total = 0
+    for monto in montos:
+        total = total + monto
+    return total
 
 
 def mejor_sala(*salas):
-    # TODO: SIN max(). Cada sala es (nombre, ventas)
-    pass
+    if not salas:
+        return ("N/A", 0)
+    mejor = salas[0]
+    for sala in salas:
+        if sala[1] > mejor[1]:
+            mejor = sala
+    return mejor
 
 
 def reporte_multisala(titulo, *funciones):
-    # TODO: Cada función es (nombre, precio, vendidas, descuento)
-    pass
+    lineas = [f"=== {titulo} ==="]
+    total = 0.0
+    for i, (nombre, precio, vendidas, descuento) in enumerate(funciones, 1):
+        ingreso = precio * vendidas * (1 - descuento / 100)
+        total += ingreso
+        lineas.append(f"Función {i}: {nombre:13s} | Q{ingreso:,.2f}")
+    lineas.append("---")
+    lineas.append(f"TOTAL: Q{total:,.2f}")
+    return "\n".join(lineas)
 
 
 # --- Pruebas (NO modificar) ---
@@ -92,8 +106,31 @@ print(reporte_multisala("Sala IMAX — Sábado",
 # Cada clave de **extras se muestra capitalizada.
 
 def ficha_pelicula(titulo, duracion, rating, **extras):
-    # TODO
-    pass
+    ancho = 35
+    lineas = []
+    lineas.append("┌" + "─" * (ancho - 2) + "┐")
+    
+    # Título centrado
+    titulo_formateado = titulo.center(ancho - 2)
+    lineas.append("│" + titulo_formateado + "│")
+    
+    lineas.append("├" + "─" * (ancho - 2) + "┤")
+    
+    # Duración y Rating
+    duracion_linea = f"Duración : {duracion} min".ljust(ancho - 2)
+    lineas.append("│" + duracion_linea + "│")
+    
+    rating_linea = f"Rating   : ★ {rating}".ljust(ancho - 2)
+    lineas.append("│" + rating_linea + "│")
+    
+    # Extras
+    for clave, valor in extras.items():
+        clave_capitalizada = clave.capitalize()
+        linea = f"{clave_capitalizada} : {valor}".ljust(ancho - 2)
+        lineas.append("│" + linea + "│")
+    
+    lineas.append("└" + "─" * (ancho - 2) + "┘")
+    return "\n".join(lineas)
 
 
 # --- Pruebas (NO modificar) ---
@@ -148,23 +185,75 @@ print(ficha_pelicula("Inside Out 3", 105, 8.9))
 #    Para el promedio semanal de cada sala, divide total / 7.
 
 def calcular_totales(ventas_por_sala):
-    # TODO: Usa ingreso_total del ejercicio 3.1
-    pass
+    resultado = []
+    for nombre_sala, ventas_lista in ventas_por_sala.items():
+        total = ingreso_total(*ventas_lista)
+        resultado.append((nombre_sala, total))
+    return resultado
 
 
 def ordenar_salas(lista_tuplas):
-    # TODO: Burbuja descendente. SIN sorted()/.sort()
-    pass
+    # Hacer una copia para no modificar el original
+    resultado = []
+    for tupla in lista_tuplas:
+        resultado.append(tupla)
+    
+    # Burbuja descendente
+    for i in range(0, len(resultado)):
+        for j in range(0, len(resultado) - 1 - i):
+            if resultado[j][1] < resultado[j + 1][1]:
+                # Intercambiar
+                temp = resultado[j]
+                resultado[j] = resultado[j + 1]
+                resultado[j + 1] = temp
+    
+    return resultado
 
 
 def tendencia(valores):
-    # TODO
-    pass
+    if not valores or len(valores) < 2:
+        return "irregular"
+    
+    es_ascendente = True
+    es_descendente = True
+    
+    for i in range(1, len(valores)):
+        if valores[i] < valores[i - 1]:
+            es_ascendente = False
+        if valores[i] > valores[i - 1]:
+            es_descendente = False
+    
+    if es_ascendente:
+        return "ascendente"
+    elif es_descendente:
+        return "descendente"
+    else:
+        return "irregular"
 
 
 def reporte_semanal(nombre_cine, ventas_por_sala):
-    # TODO: Usa todas las funciones anteriores
-    pass
+    # Calcular totales para cada sala
+    totales = calcular_totales(ventas_por_sala)
+    
+    # Ordenar salas de mayor a menor
+    salas_ordenadas = ordenar_salas(totales)
+    
+    # Construir reporte
+    lineas = [f"=== REPORTE SEMANAL: {nombre_cine} ==="]
+    
+    for ranking, (nombre_sala, total) in enumerate(salas_ordenadas, 1):
+        promedio = total / 7
+        tend = tendencia(ventas_por_sala[nombre_sala])
+        linea = f"#{ranking} {nombre_sala:12s} | Total: {total:4.0f} | Prom: {promedio:7.2f} | Tendencia: {tend}"
+        lineas.append(linea)
+    
+    lineas.append("---")
+    
+    # Mejor sala de la semana
+    mejor = mejor_sala(*totales)
+    lineas.append(f"Mejor sala de la semana: {mejor[0]} ({mejor[1]:.0f} entradas)")
+    
+    return "\n".join(lineas)
 
 
 # --- Pruebas (NO modificar) ---

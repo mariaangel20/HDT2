@@ -26,8 +26,21 @@
 # Todos los valores redondeados a 2 decimales.
 
 def calcular_ingreso(precio_base, vendidas, descuento=0.0, iva=12.0, propina_pct=0.0):
-    # TODO
-    pass
+    ingreso_bruto = precio_base * vendidas
+    monto_descuento = ingreso_bruto * (descuento / 100)
+    subtotal = ingreso_bruto - monto_descuento
+    monto_iva = subtotal * (iva / 100)
+    monto_propina = subtotal * (propina_pct / 100)
+    total = subtotal + monto_iva + monto_propina
+    
+    return (
+        round(ingreso_bruto, 2),
+        round(monto_descuento, 2),
+        round(subtotal, 2),
+        round(monto_iva, 2),
+        round(monto_propina, 2),
+        round(total, 2)
+    )
 
 
 # --- Pruebas (NO modificar) ---
@@ -72,8 +85,21 @@ print(f"Caso 3 — Bruto: Q{r3[0]} | Desc: Q{r3[1]} | Sub: Q{r3[2]} | IVA: Q{r3[
 #          → "CD26-VIP-CM0047"
 
 def generar_credencial(nombre_completo, zona="general", numero=1, prefijo="CD26"):
-    # TODO
-    pass
+    # Parse nombre completo para obtener primer nombre y último apellido
+    partes = nombre_completo.split()
+    primer_nombre = partes[0]
+    ultimo_apellido = partes[-1]
+    
+    # Extraer iniciales
+    iniciales = (primer_nombre[0] + ultimo_apellido[0]).upper()
+    
+    # Zona: primeras 3 letras en mayúsculas
+    zona_formato = zona[:3].upper()
+    
+    # Número con 4 dígitos
+    numero_formato = str(numero).zfill(4)
+    
+    return f"{prefijo}-{zona_formato}-{iniciales}{numero_formato}"
 
 
 # --- Pruebas (NO modificar) ---
@@ -113,8 +139,41 @@ print(generar_credencial("María Luisa Fernández Torres", zona="imax", numero=8
 
 def construir_reporte(titulo, datos, moneda="Q", mostrar_promedio=True,
                       mostrar_ranking=False, ancho_nombre=20):
-    # TODO: SIN sum() ni len()
-    pass
+    # Construir línea de título centrada
+    total_ancho = 40
+    padding = (total_ancho - len(titulo)) // 2
+    linea_titulo = "=" * padding + " " + titulo + " " + "=" * (total_ancho - padding - len(titulo) - 2)
+    
+    # Calcular suma y cantidad sin usar sum() ni len()
+    suma_valores = 0.0
+    cantidad = 0
+    for nombre, valor in datos:
+        suma_valores += valor
+        cantidad += 1
+    
+    # Construir las líneas de datos
+    lineas = [linea_titulo]
+    for i, (nombre, valor) in enumerate(datos):
+        if mostrar_ranking:
+            nombre_formateado = f"#{i+1} {nombre}"
+        else:
+            nombre_formateado = nombre
+        
+        nombre_formateado = nombre_formateado.ljust(ancho_nombre)
+        valor_formateado = f"{moneda}{valor:,.2f}"
+        lineas.append(f"{nombre_formateado} {valor_formateado}")
+    
+    # Agregar línea separadora
+    lineas.append("---")
+    
+    # Agregar promedio si es necesario
+    if mostrar_promedio:
+        promedio = suma_valores / cantidad
+        nombre_prom = "Promedio".ljust(ancho_nombre)
+        valor_prom = f"{moneda}{promedio:,.2f}"
+        lineas.append(f"{nombre_prom} {valor_prom}")
+    
+    return "\n".join(lineas)
 
 
 # --- Pruebas (NO modificar) ---
